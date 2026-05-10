@@ -27,7 +27,7 @@ bool firstMouse = true;
 float sensitivity = 0.1f;
 
 // light
-glm::vec3 lightPos = glm::vec3(1.0f, 1.0f, 0.5f);
+glm::vec3 lightPos = glm::vec3(1.0f, 15.0f, 0.5f); // temp just to see everything adjusted y
 glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 float shininess = 100.0f;
 float specularStrength = 10.0f;
@@ -356,6 +356,16 @@ float lightSource[] = {
     -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 };
 
+float floorPlane[] = {
+    -1.0f, 0.0f, -1.0f, 0.42f, 0.42f, 0.42f, 0.0f, 150.0f, 0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f, -1.0f, 0.42f, 0.42f, 0.42f, 66.666f, 150.0f, 0.0f, 1.0f, 0.0f,
+    -1.0f, 0.0f,  1.0f, 0.42f, 0.42f, 0.42f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,
+
+    1.0f, 0.0f, -1.0f, 0.42f, 0.42f, 0.42f, 66.666f, 150.0f, 0.0f, 1.0f, 0.0f,
+    1.0f, 0.0f,  1.0f, 0.42f, 0.42f, 0.42f, 66.666f,  0.0f, 0.0f, 1.0f, 0.0f,
+    -1.0f, 0.0f,  1.0f, 0.42f, 0.42f, 0.42f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,
+};
+
 GLuint circleTopVAO;
 GLuint circleTopVBO;
 GLuint circleTopShader;
@@ -380,12 +390,17 @@ GLuint lightSourceVAO;
 GLuint lightSourceVBO;
 GLuint lightSourceShader;
 
+GLuint floorVAO;
+GLuint floorVBO;
+GLuint floorShader;
+
 GLuint base_texture;
 GLuint middle_texture;
 GLuint top_texture;
 GLuint mandible_texture;
 GLuint gun_texture;
 GLuint pod_texture;
+GLuint floor_texture;
 
 // Helper function to setup multiple vaos and vbos
 bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t size, const char* vs, const char* fs) {
@@ -496,6 +511,25 @@ void drawLightSource(const glm::mat4& projectionMatrix) {
     glDrawArrays(GL_TRIANGLES, 0, sizeof(lightSource) / (TOTAL_VECTOR_POINTS * sizeof(float)));
 }
 
+// same code as drawLightSource
+void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.25f, -8.0f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(16.0f, 1.0f, 26.0f));
+
+    glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+
+    glUseProgram(floorShader);
+    applyLight(floorShader);
+    glUniformMatrix4fv(glGetUniformLocation(floorShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(floorShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(floorShader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    glUniform1f(glGetUniformLocation(floorShader, "floorScroll"), scrollAmount);
+    glUniform1i(glGetUniformLocation(floorShader, "floor_texture"), 0);
+    glBindVertexArray(floorVAO);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(floorPlane) / (TOTAL_VECTOR_POINTS * sizeof(float)));
+}
+
 // called by the main function to do initial setup, such as uploading vertex
 // arrays, shader programs, etc.; returns true if successful, false otherwise
 bool setup() {
@@ -506,8 +540,8 @@ bool setup() {
         circleTopShader,
         circleTop,
         sizeof(circleTop),
-        "circleTop.vs",
-        "circleTop.fs"
+        "texturedLit.vs",
+        "texturedLit.fs"
     )) {
         return false;
     }
@@ -518,8 +552,8 @@ bool setup() {
         circleBottomShader,
         circleBottom,
         sizeof(circleBottom),
-        "circleTop.vs",
-        "circleTop.fs"
+        "texturedLit.vs",
+        "texturedLit.fs"
     )) {
         return false;
     }
@@ -530,8 +564,8 @@ bool setup() {
         triangleStripShader,
         cylinderStrip,
         sizeof(cylinderStrip),
-        "circleTop.vs",
-        "circleTop.fs"
+        "texturedLit.vs",
+        "texturedLit.fs"
     )) {
         return false;
     }
@@ -542,8 +576,8 @@ bool setup() {
         frontMandiblesShader,
         frontMandibles,
         sizeof(frontMandibles),
-        "circleTop.vs",
-        "circleTop.fs"
+        "texturedLit.vs",
+        "texturedLit.fs"
     )) {
         return false;
     }
@@ -554,8 +588,8 @@ bool setup() {
         podAttachmentShader,
         podAttachment,
         sizeof(podAttachment),
-        "circleTop.vs",
-        "circleTop.fs"
+        "texturedLit.vs",
+        "texturedLit.fs"
     )) {
         return false;
     }
@@ -568,6 +602,18 @@ bool setup() {
         sizeof(lightSource),
         "lightSource.vs",
         "lightSource.fs"
+    )) {
+        return false;
+    }
+
+    if(!setupVO(
+        floorVAO,
+        floorVBO,
+        floorShader,
+        floorPlane,
+        sizeof(floorPlane),
+        "texturedLit.vs",
+        "floor.fs"
     )) {
         return false;
     }
@@ -589,6 +635,9 @@ bool setup() {
 
     pod_texture = gdevLoadTexture("falcon_pod.png", GL_REPEAT, true, true);
     if (!pod_texture) return false;
+
+    floor_texture = gdevLoadTexture("tile.png", GL_REPEAT, true, true);
+    if (!floor_texture) return false;
     return true;
 }
 
@@ -684,7 +733,7 @@ void render()
     float cameraSpeed = 5.0f * deltaTime;
     /** LIST OF COMMANDS:
         W, A, S, D = CAMERA MOVEMENTS
-        UP, DOWN = CAMERA HEIGHT MOVEMENTS
+        R, F = CAMERA HEIGHT MOVEMENTS
         J/L = LIGHT X
         I/K = LIGHT Y
         U/O = LIGHT Z
@@ -757,6 +806,10 @@ void render()
     glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
     glm::mat4 projectionView = projection * view;
     drawLightSource(projectionView);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, floor_texture);
+    drawFloor(projectionView, time * 5.0f);
     
     // flight animation
     glm::mat4 model1 = glm::mat4(1.0f);
