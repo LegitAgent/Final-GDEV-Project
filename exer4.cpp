@@ -30,7 +30,7 @@ float sensitivity = 0.1f;
 
 // light
 glm::vec3 lightPos = glm::vec3(1.0f, 15.0f, 0.5f); // temp just to see everything adjusted y
-glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 lightColor = glm::vec3(0.99f, 0.37f, 0.33f);
 float shininess = 100.0f;
 float specularStrength = 10.0f;
 
@@ -562,7 +562,7 @@ void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
     // 2 tile set loop, just translated in z axis
     for (int i = 0; i < 2; i++) {
         glm::mat4 modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.25f, -8.0f + floorOffset - floorLength * i));
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.5f, -8.0f + floorOffset - floorLength * i));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(16.0f, 1.0f, 26.0f)); // scale it to 16 x 26
 
         glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
@@ -789,6 +789,7 @@ void render()
         Q/E = SHINE CHANGE
         Z/C = SPECULAR STRENGTH CHANGE
         F1 = STATS
+        F2 = LIST OF COMMANDS
      */
 
     // key inputs for movement
@@ -919,6 +920,29 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos)
     cameraFront = glm::normalize(direction);
 }  
 
+void printHelpMenu() {
+    std::cout << "=========================================\n";
+    std::cout << "            APPLICATION COMMANDS          \n";
+    std::cout << "=========================================\n";
+    std::cout << " [W][A][S][D]  - Move Camera\n";
+    std::cout << " [R][F]        - Change Camera Height\n";
+    std::cout << "-----------------------------------------\n";
+    std::cout << " [J][L]        - Adjust Light X-Axis\n";
+    std::cout << " [I][K]        - Adjust Light Y-Axis\n";
+    std::cout << " [U][O]        - Adjust Light Z-Axis\n";
+    std::cout << "-----------------------------------------\n";
+    std::cout << " [1][2][3]     - Turn ON Red / Green / Blue\n";
+    std::cout << " [4][5][6]     - Turn OFF Red / Green / Blue\n";
+    std::cout << "-----------------------------------------\n";
+    std::cout << " [Q][E]        - Change Shininess\n";
+    std::cout << " [Z][C]        - Change Specular Strength\n";
+    std::cout << "-----------------------------------------\n";
+    std::cout << " [F1]          - Toggle Stats\n";
+    std::cout << " [F2]          - Show This Help Menu\n";
+    std::cout << "=========================================\n" << std::endl;
+}
+
+
 // handler called by GLFW when there is a keyboard event
 void handleKeys(GLFWwindow* pWindow, int key, int scancode, int action, int mode)
 {
@@ -929,6 +953,9 @@ void handleKeys(GLFWwindow* pWindow, int key, int scancode, int action, int mode
     if (key == GLFW_KEY_F1 && action == GLFW_PRESS) 
         printf("STATS\n Camera Position: (x: %f, y: %f, z: %f)\n Light Positioning: (x: %f, y: %f, z: %f)\n Light Color: (r: %f, g: %f, b: %f)\n Shininess: (shine: %f)\n Specular Strength: (strength: %f)\n", 
                 cameraPos.x, cameraPos.y, cameraPos.z, lightPos.x, lightPos.y, lightPos.z, lightColor.r, lightColor.g, lightColor.b, shininess, specularStrength);
+    // show commands            
+    if (key == GLFW_KEY_F2 && action == GLFW_PRESS) 
+        printHelpMenu();
 }
 
 // handler called by GLFW when the window is resized
