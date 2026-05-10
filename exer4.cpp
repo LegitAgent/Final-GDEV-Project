@@ -7,7 +7,9 @@
 // DOWN to move down
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
+#include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -314,16 +316,16 @@ float podAttachment[] = {
 
 float lightSource[] = {
     -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
     -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
     -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
 
     -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
     -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
     -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
 
@@ -334,37 +336,70 @@ float lightSource[] = {
     -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
     -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
 
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
 
     -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
     -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
     -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
 
     -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
     -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
     -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 };
 
-float floorPlane[] = {
-    -1.0f, 0.0f, -1.0f, 0.42f, 0.42f, 0.42f, 0.0f, 150.0f, 0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f, -1.0f, 0.42f, 0.42f, 0.42f, 66.666f, 150.0f, 0.0f, 1.0f, 0.0f,
-    -1.0f, 0.0f,  1.0f, 0.42f, 0.42f, 0.42f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,
+std::vector<float> floorPlane;
 
-    1.0f, 0.0f, -1.0f, 0.42f, 0.42f, 0.42f, 66.666f, 150.0f, 0.0f, 1.0f, 0.0f,
-    1.0f, 0.0f,  1.0f, 0.42f, 0.42f, 0.42f, 66.666f,  0.0f, 0.0f, 1.0f, 0.0f,
-    -1.0f, 0.0f,  1.0f, 0.42f, 0.42f, 0.42f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,
-};
+void addFloorVertex(float x, float z, float u, float v) {
+    floorPlane.insert(floorPlane.end(), {
+        x, 0.0f, z,
+        0.42f, 0.42f, 0.42f,
+        u, v,
+        0.0f, 1.0f, 0.0f
+    });
+}
+
+void generateFloorPlane() {
+    const int segments = 80; // amount of shapes to 80x80 per grid
+    const float uvWidth = 66.666f; // frequency of shapes (8/18 == 0.44 ratio)
+    const float uvHeight = 150.0f;
+
+    floorPlane.reserve(segments * segments * 6 * TOTAL_VECTOR_POINTS);
+
+    for (int z = 0; z < segments; z++) {
+        for (int x = 0; x < segments; x++) {
+            // tile corners
+            float x0 = -1.0f + 2.0f * x / segments;
+            float x1 = -1.0f + 2.0f * (x + 1) / segments; // x+1 next grid line
+            float z0 = -1.0f + 2.0f * z / segments;
+            float z1 = -1.0f + 2.0f * (z + 1) / segments;
+
+            // texture coords
+            float u0 = uvWidth * x / segments;
+            float u1 = uvWidth * (x + 1) / segments; // same logic
+            float v0 = uvHeight * z / segments;
+            float v1 = uvHeight * (z + 1) / segments;
+
+            addFloorVertex(x0, z0, u0, v0);
+            addFloorVertex(x1, z0, u1, v0);
+            addFloorVertex(x0, z1, u0, v1);
+
+            addFloorVertex(x1, z0, u1, v0);
+            addFloorVertex(x1, z1, u1, v1);
+            addFloorVertex(x0, z1, u0, v1);
+        }
+    }
+}
 
 GLuint circleTopVAO;
 GLuint circleTopVBO;
@@ -401,6 +436,7 @@ GLuint mandible_texture;
 GLuint gun_texture;
 GLuint pod_texture;
 GLuint floor_texture;
+GLuint noise_texture;
 
 // Helper function to setup multiple vaos and vbos
 bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t size, const char* vs, const char* fs) {
@@ -511,28 +547,35 @@ void drawLightSource(const glm::mat4& projectionMatrix) {
     glDrawArrays(GL_TRIANGLES, 0, sizeof(lightSource) / (TOTAL_VECTOR_POINTS * sizeof(float)));
 }
 
-// same code as drawLightSource
 void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.25f, -8.0f));
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(16.0f, 1.0f, 26.0f));
-
-    glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+    const float floorLength = 52.0f; // scaled from 26.0f * 2
+    const float floorOffset = std::fmod(scrollAmount, floorLength); // wrap around if exceeds floor length
 
     glUseProgram(floorShader);
     applyLight(floorShader);
     glUniformMatrix4fv(glGetUniformLocation(floorShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(floorShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(floorShader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
-    glUniform1f(glGetUniformLocation(floorShader, "floorScroll"), scrollAmount);
+    glUniform1f(glGetUniformLocation(floorShader, "heightScale"), 0.45f); // height scaling factor
     glUniform1i(glGetUniformLocation(floorShader, "floor_texture"), 0);
+    glUniform1i(glGetUniformLocation(floorShader, "noiseMap"), 1); // for random numps
     glBindVertexArray(floorVAO);
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(floorPlane) / (TOTAL_VECTOR_POINTS * sizeof(float)));
+
+    // 2 tile set loop, just translated in z axis
+    for (int i = 0; i < 2; i++) {
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.25f, -8.0f + floorOffset - floorLength * i));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(16.0f, 1.0f, 26.0f)); // scale it to 16 x 26
+
+        glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(floorShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(floorShader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
+        glDrawArrays(GL_TRIANGLES, 0, floorPlane.size() / TOTAL_VECTOR_POINTS);
+    }
 }
 
 // called by the main function to do initial setup, such as uploading vertex
 // arrays, shader programs, etc.; returns true if successful, false otherwise
 bool setup() {
+    generateFloorPlane();
 
     if(!setupVO(
         circleTopVAO,
@@ -610,9 +653,9 @@ bool setup() {
         floorVAO,
         floorVBO,
         floorShader,
-        floorPlane,
-        sizeof(floorPlane),
-        "texturedLit.vs",
+        floorPlane.data(),
+        floorPlane.size() * sizeof(float),
+        "floor.vs",
         "floor.fs"
     )) {
         return false;
@@ -638,6 +681,10 @@ bool setup() {
 
     floor_texture = gdevLoadTexture("tile.png", GL_REPEAT, true, true);
     if (!floor_texture) return false;
+
+    noise_texture = gdevLoadTexture("noise_map.png", GL_REPEAT, true, true);
+    if (!noise_texture) return false;
+
     return true;
 }
 
@@ -809,7 +856,9 @@ void render()
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, floor_texture);
-    drawFloor(projectionView, time * 5.0f);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, noise_texture);
+    drawFloor(projectionView, time * 2.0f);
     
     // flight animation
     glm::mat4 model1 = glm::mat4(1.0f);

@@ -5,7 +5,7 @@ in vec3 worldSpaceNormal;
 in vec3 objectColor;
 in vec2 shaderUV; // floor coords
 
-uniform sampler2D top_texture;
+uniform sampler2D floor_texture;
 uniform vec3 cameraPos;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -39,6 +39,6 @@ void main() {
     vec3 specular = specularStrength * 0.08f * specularLight * lightColor;
     vec3 lighting = ambient + diffuseColor + specular;
 
-    vec4 texColor = texture(top_texture, movingUV);
+    vec4 texColor = texture(floor_texture, movingUV);
     fragmentColor = vec4(texColor.rgb * baseColor * objectColor * lighting, texColor.a);
 }
