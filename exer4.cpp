@@ -413,8 +413,8 @@ void addFloorVertex(float x, float z, float u, float v) {
 
 void generateFloorPlane() {
     const int segments = 80; // amount of shapes to 80x80 per grid
-    const float uvWidth = 66.666f; // frequency of shapes (8/18 == 0.44 ratio)
-    const float uvHeight = 150.0f;
+    const float uvWidth = 35.553f; // frequency of shapes (8/18 == 0.44 ratio)
+    const float uvHeight = 80.0f;
 
     floorPlane.reserve(segments * segments * 6 * TOTAL_VECTOR_POINTS);
 
@@ -750,13 +750,14 @@ bool setup() {
     return true;
 }
 
-void drawBackground(const glm::mat4& projectionMatrix) {
+void drawBackground(const glm::mat4& projectionMatrix, const float scrollAmount) {
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
     glUseProgram(backgroundShader);
     glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniform1i(glGetUniformLocation(backgroundShader, "background_texture"), 0);
+    glUniform1f(glGetUniformLocation(backgroundShader, "backgroundScroll"), scrollAmount);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, background_texture);
@@ -856,6 +857,7 @@ void render()
     // camera movement speed
     float cameraSpeed = 5.0f * deltaTime;
     /** LIST OF COMMANDS:
+        SHIFT = SPRINT
         W, A, S, D = CAMERA MOVEMENTS
         R, F = CAMERA HEIGHT MOVEMENTS
         J/L = LIGHT X
@@ -870,6 +872,9 @@ void render()
      */
 
     // key inputs for movement
+    if (glfwGetKey(pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(pWindow, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) 
+        cameraSpeed *= 10;
+
     if (glfwGetKey(pWindow, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(pWindow, GLFW_KEY_S) == GLFW_PRESS)
@@ -931,13 +936,13 @@ void render()
     glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
     glm::mat4 projectionView = projection * view;
     drawLightSource(projectionView);
-    drawBackground(projectionView);
+    drawBackground(projectionView, time * 0.01f);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, floor_texture);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, noise_texture);
-    drawFloor(projectionView, time * 2.0f);
+    drawFloor(projectionView, time * 4.0f);
     
     glm::mat4 milleniumFlacon = glm::mat4(1.0f);
     milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(0.0f, 3.0f, -15.0f));
@@ -989,6 +994,7 @@ void printHelpMenu() {
     std::cout << "=========================================\n";
     std::cout << " [W][A][S][D]  - Move Camera\n";
     std::cout << " [R][F]        - Change Camera Height\n";
+    std::cout << " [SHIFT]       - Sprint / Faster Movement\n";
     std::cout << "-----------------------------------------\n";
     std::cout << " [J][L]        - Adjust Light X-Axis\n";
     std::cout << " [I][K]        - Adjust Light Y-Axis\n";
