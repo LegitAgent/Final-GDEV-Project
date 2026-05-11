@@ -29,10 +29,10 @@ bool firstMouse = true;
 float sensitivity = 0.1f;
 
 // light
-glm::vec3 lightPos = glm::vec3(1.0f, 15.0f, 0.5f); // temp just to see everything adjusted y
-glm::vec3 lightColor = glm::vec3(0.99f, 0.37f, 0.33f);
-float shininess = 100.0f;
-float specularStrength = 10.0f;
+glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, -4.0f); // temp just to see everything adjusted y
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+float shininess = 64.0f;
+float specularStrength = 2.5f;
 
 // camera positions
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -358,6 +358,48 @@ float lightSource[] = {
     -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 };
 
+float background[] = {
+    // Back wall
+    -24.0f, -28.0f, -86.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+     24.0f, -28.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+    -24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
+     24.0f, -28.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,
+     24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,  0.0f, 0.0f, 1.0f,
+    -24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  0.0f, 0.0f, 1.0f,
+
+    // Front wall
+     24.0f, -28.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f,  0.0f, 0.0f, -1.0f,
+    -24.0f, -28.0f,  18.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  0.0f, 0.0f, -1.0f,
+     24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  0.0f, 0.0f, -1.0f,
+    -24.0f, -28.0f,  18.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  0.0f, 0.0f, -1.0f,
+    -24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,  0.0f, 0.0f, -1.0f,
+     24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  0.0f, 0.0f, -1.0f,
+
+    // Left wall
+    -24.0f, -28.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+    -24.0f, -28.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+    -24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  1.0f, 0.0f, 0.0f,
+    -24.0f, -28.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+    -24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,  1.0f, 0.0f, 0.0f,
+    -24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  1.0f, 0.0f, 0.0f,
+
+    // Right wall
+     24.0f, -28.0f, -86.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+     24.0f, -28.0f,  18.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+     24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+     24.0f, -28.0f,  18.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+     24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+     24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+
+    // Ceiling
+    -24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  0.0f, 0.0f,  0.0f, -1.0f, 0.0f,
+     24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  0.0f, -1.0f, 0.0f,
+    -24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  0.0f, -1.0f, 0.0f,
+     24.0f,  44.0f, -86.0f,  1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  0.0f, -1.0f, 0.0f,
+     24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  1.0f, 1.0f,  0.0f, -1.0f, 0.0f,
+    -24.0f,  44.0f,  18.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  0.0f, -1.0f, 0.0f,
+};
+
 std::vector<float> floorPlane;
 
 void addFloorVertex(float x, float z, float u, float v) {
@@ -378,7 +420,7 @@ void generateFloorPlane() {
 
     for (int z = 0; z < segments; z++) {
         for (int x = 0; x < segments; x++) {
-            // tile corners
+            // tile corners (each tile is 2 units wide, i.e. -1 to 1)
             float x0 = -1.0f + 2.0f * x / segments;
             float x1 = -1.0f + 2.0f * (x + 1) / segments; // x+1 next grid line
             float z0 = -1.0f + 2.0f * z / segments;
@@ -429,6 +471,10 @@ GLuint floorVAO;
 GLuint floorVBO;
 GLuint floorShader;
 
+GLuint backgroundVAO;
+GLuint backgroundVBO;
+GLuint backgroundShader;
+
 GLuint base_texture;
 GLuint middle_texture;
 GLuint top_texture;
@@ -437,6 +483,7 @@ GLuint gun_texture;
 GLuint pod_texture;
 GLuint floor_texture;
 GLuint noise_texture;
+GLuint background_texture;
 
 // Helper function to setup multiple vaos and vbos
 bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t size, const char* vs, const char* fs) {
@@ -554,16 +601,16 @@ void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
     glUseProgram(floorShader);
     applyLight(floorShader);
     glUniformMatrix4fv(glGetUniformLocation(floorShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    glUniform1f(glGetUniformLocation(floorShader, "heightScale"), 0.45f); // height scaling factor
+    glUniform1f(glGetUniformLocation(floorShader, "heightScale"), 1.5f); // height scaling factor
     glUniform1i(glGetUniformLocation(floorShader, "floor_texture"), 0);
     glUniform1i(glGetUniformLocation(floorShader, "noiseMap"), 1); // for random numps
     glBindVertexArray(floorVAO);
 
     // 2 tile set loop, just translated in z axis
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 3; i++) {
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.5f, -8.0f + floorOffset - floorLength * i));
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(16.0f, 1.0f, 26.0f)); // scale it to 16 x 26
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(24.0f, 1.0f, 26.0f)); // scale it to 24 x 26
 
         glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
         glUniformMatrix4fv(glGetUniformLocation(floorShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -661,6 +708,18 @@ bool setup() {
         return false;
     }
 
+    if(!setupVO(
+        backgroundVAO,
+        backgroundVBO,
+        backgroundShader,
+        background,
+        sizeof(background),
+        "texturedLit.vs",
+        "background.fs"
+    )) {
+        return false;
+    }
+
     base_texture = gdevLoadTexture("falcon_base.png", GL_REPEAT, true, true);
     if (!base_texture) return false;
 
@@ -685,7 +744,25 @@ bool setup() {
     noise_texture = gdevLoadTexture("noise_map.png", GL_REPEAT, true, true);
     if (!noise_texture) return false;
 
+    background_texture = gdevLoadTexture("space.png", GL_REPEAT, true, true);
+    if (!background_texture) return false;
+
     return true;
+}
+
+void drawBackground(const glm::mat4& projectionMatrix) {
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+
+    glUseProgram(backgroundShader);
+    glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform1i(glGetUniformLocation(backgroundShader, "background_texture"), 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, background_texture);
+
+    glBindVertexArray(backgroundVAO);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(background) / (TOTAL_VECTOR_POINTS * sizeof(float)));
 }
 
 void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
@@ -854,6 +931,7 @@ void render()
     glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
     glm::mat4 projectionView = projection * view;
     drawLightSource(projectionView);
+    drawBackground(projectionView);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, floor_texture);
@@ -861,29 +939,14 @@ void render()
     glBindTexture(GL_TEXTURE_2D, noise_texture);
     drawFloor(projectionView, time * 2.0f);
     
-    // flight animation
-    glm::mat4 model1 = glm::mat4(1.0f);
-    model1 = glm::translate(model1, glm::vec3(0.0f, 0.25f, -5.0f));
-    model1 = glm::rotate(model1, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 milleniumFlacon = glm::mat4(1.0f);
+    milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(0.0f, 3.0f, -15.0f));
+    milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    milleniumFlacon = glm::scale(milleniumFlacon, glm::vec3(5.0f));
+    milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(sin(time * 0.75f) * 45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    // rotation animation
-    glm::mat4 model2 = glm::mat4(1.0f);
-    model2 = glm::translate(model2, glm::vec3(5.0f, 0.0f, -5.0f));
-    model2 = glm::rotate(model2, glm::radians(time * 75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    model2 = glm::rotate(model2, glm::radians(135.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model2 = glm::scale(model2, glm::vec3(1.5f, 1.5f, 1.5f));
-    
-    // barrel role animation
-    glm::mat4 model3 = glm::mat4(1.0f);
-    model3 = glm::translate(model3, glm::vec3(-5.0f + sin(time * 0.9f) * 0.55f, -0.15f, -5.0f));
-    model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model3 = glm::rotate(model3, glm::radians(sin(time * 1.2f) * 8.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    model3 = glm::rotate(model3, glm::radians(time * 220.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model3 = glm::scale(model3, glm::vec3(1.5f, 1.5f, 1.5f));
-
-    drawMillenniumFalcon(model1, view, projection);
-    drawMillenniumFalcon(model2, view, projection);
-    drawMillenniumFalcon(model3, view, projection);
+    drawMillenniumFalcon(milleniumFlacon, view, projection);
 }
 
 // mouse movement function
@@ -1026,7 +1089,7 @@ int main(int argc, char** argv)
     // set the mouse cursor to the center of the window at the start of the program
     glfwSetCursorPos(pWindow, WINDOW_WIDTH/2.0, WINDOW_HEIGHT/2.0);
 
-    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // if our initial setup is successful...
     if (setup())
