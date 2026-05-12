@@ -19,14 +19,9 @@ void pushVertex(vector<glm::vec3>& verts, float x, float y, float z) {
     verts.push_back(glm::normalize(glm::vec3(x, y, z)));
 }
 
-int getMidpoint(int a, int b, vector<glm::vec3>& verts, unordered_map<long long, int>& cache) {
-    long long key = ((long long)min(a, b) << 20) | max(a, b);
-    auto it = cache.find(key);
-    if (it != cache.end()) return it->second;
-
+int getMidpoint(int a, int b, vector<glm::vec3>& verts) {
     int idx = (int)verts.size();
     verts.push_back(glm::normalize((verts[a] + verts[b]) * 0.5f));
-    cache[key] = idx;
     return idx;
 }
 
@@ -54,13 +49,12 @@ vector<array<int, 3>> buildFaces(vector<glm::vec3>& verts, int subdivisions) {
     };
 
     for (int s = 0; s < subdivisions; s++) {
-        unordered_map<long long, int> cache;
         vector<array<int, 3>> next;
 
         for (auto& f : faces) {
-            int m01 = getMidpoint(f[0], f[1], verts, cache);
-            int m12 = getMidpoint(f[1], f[2], verts, cache);
-            int m20 = getMidpoint(f[2], f[0], verts, cache);
+            int m01 = getMidpoint(f[0], f[1], verts);
+            int m12 = getMidpoint(f[1], f[2], verts);
+            int m20 = getMidpoint(f[2], f[0], verts);
             next.push_back({f[0], m01, m20});
             next.push_back({f[1], m12, m01});
             next.push_back({f[2], m20, m12});
@@ -103,7 +97,6 @@ void generateIcosphere(float r, float g, float b, int subdivisions) {
 
     int faceCount = (int)faces.size();
     printf("// GL_TRIANGLES  (%d faces, %d vertices)\n", faceCount, faceCount * 3);
-    printf("float icoSphere[] = {\n");
 
     for (auto& f : faces) {
         glm::vec3 pts[3] = { verts[f[0]], verts[f[1]], verts[f[2]] };
@@ -118,8 +111,6 @@ void generateIcosphere(float r, float g, float b, int subdivisions) {
             printVertex(pts[i], r, g, b, uv[i], pts[i]);
         }
     }
-
-    printf("};\n");
 }
 
 int main() {
