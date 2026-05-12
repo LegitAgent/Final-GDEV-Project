@@ -4,10 +4,12 @@ in vec3 objectColor;
 in vec2 shaderUV;
 
 uniform sampler2D background_texture;
+uniform float backgroundScroll;
 
 out vec4 fragmentColor;
 
 void main() {
-    vec4 texColor = texture(background_texture, shaderUV);
+    vec2 scrollBG = shaderUV + vec2(backgroundScroll, 0.0f);
+    vec4 texColor = texture(background_texture, scrollBG);
     fragmentColor = vec4(texColor.rgb * objectColor, texColor.a);
 }
