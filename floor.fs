@@ -24,7 +24,7 @@ void main() {
     float gridLine = step(cell.x, 0.035f) + step(cell.y, 0.035f); // return 1 if cell.x < 0.035f, (0.035f is basically the thickness of the line)
     gridLine = clamp(gridLine, 0.0f, 1.0f); // can be 2 so clamp to 0 to 1, 0 = no line, 1 = line
 
-    vec3 baseColor = mix(vec3(0.05f, 0.02f, 0.12f), vec3(0.00f, 0.95f, 1.00f), gridLine); // mix two colors, read opengl docs
+    vec3 baseColor = vec3(1.00f, 1.00f, 1.00f);
 
     // copy paste from texturedLit.fs
     vec3 lightDir = normalize(lightPos - worldSpacePosition);
