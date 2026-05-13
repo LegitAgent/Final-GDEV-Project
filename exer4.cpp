@@ -33,10 +33,10 @@ bool firstMouse = true;
 float sensitivity = 0.1f;
 
 // light
-glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, -4.0f); // temp just to see everything adjusted y
-glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-float shininess = 64.0f;
-float specularStrength = 2.5f;
+glm::vec3 lightPos = glm::vec3(-0.119400f, 4.857521f, -13.088955f);
+glm::vec3 lightColor = glm::vec3(0.7f, 0.85f, 1.0f);
+float shininess = 128.0f;
+float specularStrength = 3.0f;
 
 // camera positions
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -599,7 +599,13 @@ GLuint floor_texture;
 GLuint noise_texture;
 GLuint background_texture;
 GLuint sun_texture;
+
+GLuint base_normal;
 GLuint top_normal;
+GLuint mandible_normal;
+GLuint middle_normal;
+GLuint gun_normal;
+GLuint pod_normal;
 
 // Helper function to setup multiple vaos and vbos
 bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t size, const char* vs, const char* fs) {
@@ -696,10 +702,14 @@ void drawCylinder(GLuint topShader,
 }
 
 // draws the box section at the center of the falcon. needs a shader and a matrix
-void drawPodSection(GLuint shader, const glm::mat4& projectionMatrix, const glm::mat4& modelMatrix) {
+void drawPodSection(GLuint shader, const glm::mat4& projectionMatrix, const glm::mat4& modelMatrix, bool useNormal = false) {
     glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
     glUseProgram(shader);
     applyLight(shader);
+    if (useNormal) {
+        glUniform1i(glGetUniformLocation(shader, "useNormalMap"), 1);
+        glUniform1i(glGetUniformLocation(shader, "normalMap"), 1);
+    }
     glUniformMatrix4fv(glGetUniformLocation(shader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(glGetUniformLocation(shader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(glGetUniformLocation(shader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
@@ -787,22 +797,32 @@ void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
     // Main saucer: flatter and wider to read more like the Falcon hull.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, base_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, base_normal);
 
     glm::mat4 baseHull = glm::scale(model, glm::vec3(1.16f, 0.94f, 0.26f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, baseHull);
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, baseHull, true);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
 
     // Raised center body: pulled slightly rearward to mimic the Falcon's top mass.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, middle_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, middle_normal);
 
     // Connector slab so the base hull and middle hull read as one continuous body.
     glm::mat4 centerConnector = glm::translate(model, glm::vec3(-0.09f, 0.0f, -0.03f));
     centerConnector = glm::scale(centerConnector, glm::vec3(1.02f, 0.84f, 0.22f));
-    drawPodSection(podAttachmentShader, projectionView, centerConnector);
+    drawPodSection(podAttachmentShader, projectionView, centerConnector, true);
     
     glm::mat4 centerBody = glm::translate(model, glm::vec3(-0.09f, 0.0f, -0.05f));
     centerBody = glm::scale(centerBody, glm::vec3(0.95f, 0.78f, 0.16f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, centerBody);
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, centerBody, true);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
 
     // Highest central hump: smaller and offset so the middle protrudes.
     glActiveTexture(GL_TEXTURE0);
@@ -813,7 +833,7 @@ void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
     // Secondary connector to remove the gap between middle hull and top hump.
     glm::mat4 humpConnector = glm::translate(model, glm::vec3(-0.04f, 0.0f, -0.09f));
     humpConnector = glm::scale(humpConnector, glm::vec3(0.58f, 0.48f, 0.14f));
-    drawPodSection(podAttachmentShader, projectionView, humpConnector);
+    drawPodSection(podAttachmentShader, projectionView, humpConnector, true);
     
     glm::mat4 dorsalHump = glm::translate(model, glm::vec3(-0.02f, 0.0f, -0.10f));
     dorsalHump = glm::scale(dorsalHump, glm::vec3(0.50f, 0.44f, 0.11f));
@@ -825,6 +845,8 @@ void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
     // Mandibles
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mandible_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, mandible_normal);
     
     glm::mat4 mandibleModel = glm::translate(model, glm::vec3(0.34f, 0.0f, -0.01f));
     mandibleModel = glm::scale(mandibleModel, glm::vec3(0.74f, 0.76f, 0.35f));
@@ -832,31 +854,47 @@ void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
 
     glUseProgram(frontMandiblesShader);
     applyLight(frontMandiblesShader);
+    glUniform1i(glGetUniformLocation(frontMandiblesShader, "useNormalMap"), 1);
+    glUniform1i(glGetUniformLocation(frontMandiblesShader, "normalMap"), 1);
     glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionView));
     glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(mandibleModel));
     glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(mandibleNormal));
     glBindVertexArray(frontMandiblesVAO);
     glDrawArrays(GL_TRIANGLES, 0, sizeof(frontMandibles) / (TOTAL_VECTOR_POINTS * sizeof(float)));
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
 
     // Center fork bar between the mandibles, extending in the same forward direction.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, gun_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, gun_normal);
 
     glm::mat4 centerBar = glm::translate(model, glm::vec3(0.59f, 0.0f, -0.01f));
     centerBar = glm::scale(centerBar, glm::vec3(0.95f, 0.16f, 0.18f));
-    drawPodSection(podAttachmentShader, projectionView, centerBar);
+    drawPodSection(podAttachmentShader, projectionView, centerBar, true);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
 
     // Pods
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, pod_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, pod_normal);
+
     // Side thruster pods mounted near the rear flanks.
     glm::mat4 upperThruster = glm::translate(model, glm::vec3(-0.43f, 0.36f, 0.01f));
     upperThruster = glm::scale(upperThruster, glm::vec3(0.24f, 0.24f, 0.13f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, upperThruster);
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, upperThruster, true);
 
     glm::mat4 lowerThruster = glm::translate(model, glm::vec3(-0.43f, -0.36f, 0.01f));
     lowerThruster = glm::scale(lowerThruster, glm::vec3(0.24f, 0.24f, 0.13f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, lowerThruster);
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, lowerThruster, true);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 // called by the main function to do initial setup, such as uploading vertex
@@ -978,7 +1016,7 @@ bool setup() {
     middle_texture = gdevLoadTexture("falcon_middle.png", GL_REPEAT, true, true);
     if (!middle_texture) return false;
 
-    top_texture = gdevLoadTexture("metal1.jpg", GL_REPEAT, true, true);
+    top_texture = gdevLoadTexture("falcon_top.png", GL_REPEAT, true, true);
     if (!top_texture) return false;
 
     mandible_texture = gdevLoadTexture("falcon_mandible.png", GL_REPEAT, true, true);
@@ -1002,9 +1040,26 @@ bool setup() {
     sun_texture = gdevLoadTexture("sun.png", GL_REPEAT, true, true);
     if (!sun_texture) return false;
 
-    top_normal = gdevLoadTexture("metal1_normal.png", GL_REPEAT, true, true);
+    // NORMALS
+
+    base_normal = gdevLoadTexture("falcon_base_normal.png", GL_REPEAT, true, true);
+    if (!base_normal) return false;
+
+    top_normal = gdevLoadTexture("falcon_top_normal.png", GL_REPEAT, true, true);
     if (!top_normal) return false;
 
+    mandible_normal = gdevLoadTexture("falcon_mandible_normal.png", GL_REPEAT, true, true);
+    if (!mandible_normal) return false;
+
+    middle_normal = gdevLoadTexture("falcon_middle_normal.png", GL_REPEAT, true, true);
+    if (!middle_normal) return false;
+
+    gun_normal = gdevLoadTexture("falcon_gun_normal.png", GL_REPEAT, true, true);
+    if (!gun_normal) return false;
+
+    pod_normal = gdevLoadTexture("falcon_pod_normal.png", GL_REPEAT, true, true);
+    if (!pod_normal) return false;
+    
     return true;
 }
 
