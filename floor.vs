@@ -18,7 +18,7 @@ out vec3 objectColor;
 out vec2 shaderUV;
 
 void main() {
-    vec2 chunkUV = vertexUV / vec2(35.553f, 80.0f); // get it on a per chunk basis (66.666 x 150 texture images per segment)
+    vec2 chunkUV = vertexUV / vec2(73.846f, 80.0f); // get it on a per chunk basis (73.846 x 80 texture images per segment) ratio for 24/26
     float height = texture(noiseMap, chunkUV).r; // get the red value of the noisemap
     float centeredHeight = height * 2.0f - 1.0f; // convert from 0 to 1 to -1 to 1
     

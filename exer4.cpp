@@ -523,7 +523,7 @@ void addFloorVertex(float x, float z, float u, float v) {
 
 void generateFloorPlane() {
     const int segments = 80; // amount of shapes to 80x80 per grid
-    const float uvWidth = 35.553f; // frequency of shapes (8/18 == 0.44 ratio)
+    const float uvWidth = 73.846f; // frequency of shapes (8/18 == 0.44 ratio)
     const float uvHeight = 80.0f;
 
     floorPlane.reserve(segments * segments * 6 * TOTAL_VECTOR_POINTS);
@@ -732,7 +732,7 @@ void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
     glUniform1i(glGetUniformLocation(floorShader, "noiseMap"), 1); // for random numps
     glBindVertexArray(floorVAO);
 
-    // 2 tile set loop, just translated in z axis
+    // 3 tile set loop, just translated in z axis
     for (int i = 0; i < 3; i++) {
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -4.0f, -8.0f + floorOffset - floorLength * i));
