@@ -28,6 +28,11 @@ void main() {
     vec2 deltaUV1  = dFdx(shaderUV);
     vec2 deltaUV2  = dFdy(shaderUV);
 
+    // TBN matrix
+    // T is tangent, determining the U direction in world space
+    // B is bitangent, determining the V direction in world space. This is gotten by cross product of n and T
+    // N is just the normal
+    // We use this so the normal mapping is correct regardless of object's rotation
     vec3 T = normalize(edge1 * deltaUV2.t - edge2 * deltaUV1.t);
     vec3 B = -normalize(cross(n, T));
     mat3 TBN = mat3(T, B, n);
