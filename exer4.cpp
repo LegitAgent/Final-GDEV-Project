@@ -33,7 +33,7 @@ bool firstMouse = true;
 float sensitivity = 0.1f;
 
 // light
-glm::vec3 lightPos = glm::vec3(-0.119400f, 4.857521f, -13.088955f);
+glm::vec3 lightPos = glm::vec3(-0.119400f, 8.050172f, -13.088955f);
 glm::vec3 lightColor = glm::vec3(0.7f, 0.85f, 1.0f);
 float shininess = 128.0f;
 float specularStrength = 3.0f;
@@ -737,7 +737,7 @@ void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
     glUseProgram(floorShader);
     applyLight(floorShader);
     glUniformMatrix4fv(glGetUniformLocation(floorShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    glUniform1f(glGetUniformLocation(floorShader, "heightScale"), 1.5f); // height scaling factor
+    glUniform1f(glGetUniformLocation(floorShader, "heightScale"), 2.0f); // height scaling factor
     glUniform1i(glGetUniformLocation(floorShader, "floor_texture"), 0);
     glUniform1i(glGetUniformLocation(floorShader, "noiseMap"), 1); // for random numps
     glBindVertexArray(floorVAO);
@@ -1172,7 +1172,7 @@ void render()
     drawFloor(projectionView, time * 4.0f);
     
     glm::mat4 milleniumFlacon = glm::mat4(1.0f);
-    milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(0.0f, -2.0f, -10.0f));
+    milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(0.0f, 0.0f, -10.0f));
     milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(sin(time)*5.0f, 0.0, sin(time)*2.0f));
     milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
