@@ -1499,6 +1499,8 @@ bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t s
 }
 
 void applyLight(GLuint shader) {
+    glUniform1i(glGetUniformLocation(shader, "useNormalMap"), 0);
+    glUniform1i(glGetUniformLocation(shader, "normalMap"), 1);
     glUniform3fv(glGetUniformLocation(shader, "lightPos"), 1, glm::value_ptr(lightPos));
     glUniform3fv(glGetUniformLocation(shader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform3fv(glGetUniformLocation(shader, "lightColor"), 1, glm::value_ptr(lightColor));
@@ -1672,6 +1674,9 @@ void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
     glm::mat4 dorsalHump = glm::translate(model, glm::vec3(-0.02f, 0.0f, -0.10f));
     dorsalHump = glm::scale(dorsalHump, glm::vec3(0.50f, 0.44f, 0.11f));
     drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, dorsalHump, true);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
     
     // Mandibles
     glActiveTexture(GL_TEXTURE0);
