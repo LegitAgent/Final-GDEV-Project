@@ -643,6 +643,8 @@ bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t s
 }
 
 void applyLight(GLuint shader) {
+    glUniform1i(glGetUniformLocation(shader, "useNormalMap"), 0);
+    glUniform1i(glGetUniformLocation(shader, "normalMap"), 1);
     glUniform3fv(glGetUniformLocation(shader, "lightPos"), 1, glm::value_ptr(lightPos));
     glUniform3fv(glGetUniformLocation(shader, "cameraPos"), 1, glm::value_ptr(cameraPos));
     glUniform3fv(glGetUniformLocation(shader, "lightColor"), 1, glm::value_ptr(lightColor));
@@ -652,13 +654,21 @@ void applyLight(GLuint shader) {
 
 // draws a cylinder given the model-view-projection matrix and the shaders for each of the three sections.
 // needs diff shaders since cylinders can have different textures.
-void drawCylinder(GLuint topShader, GLuint bottomShader, GLuint sideShader, const glm::mat4& projectionMatrix, const glm::mat4& modelMatrix) {
-
+void drawCylinder(GLuint topShader, 
+                    GLuint bottomShader, 
+                    GLuint sideShader, 
+                    const glm::mat4& projectionMatrix, 
+                    const glm::mat4& modelMatrix,
+                    bool useNormal = false ) {
     glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
     // top cap
     glUseProgram(topShader);
     // sends exactly one matrix, without transposing it or anything. using the memory address of the glm matrix data.
     applyLight(topShader);
+    if (useNormal) {
+        glUniform1i(glGetUniformLocation(topShader, "useNormalMap"), 1);
+        glUniform1i(glGetUniformLocation(topShader, "normalMap"), 1);
+    }
     glUniformMatrix4fv(glGetUniformLocation(topShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(glGetUniformLocation(topShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniformMatrix4fv(glGetUniformLocation(topShader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
@@ -797,6 +807,8 @@ void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
     // Highest central hump: smaller and offset so the middle protrudes.
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, top_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, top_normal);
 
     // Secondary connector to remove the gap between middle hull and top hump.
     glm::mat4 humpConnector = glm::translate(model, glm::vec3(-0.04f, 0.0f, -0.09f));
@@ -805,7 +817,10 @@ void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection)
     
     glm::mat4 dorsalHump = glm::translate(model, glm::vec3(-0.02f, 0.0f, -0.10f));
     dorsalHump = glm::scale(dorsalHump, glm::vec3(0.50f, 0.44f, 0.11f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, dorsalHump);
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, dorsalHump, true);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
     
     // Mandibles
     glActiveTexture(GL_TEXTURE0);
@@ -989,7 +1004,7 @@ bool setup() {
 
     top_normal = gdevLoadTexture("metal1_normal.png", GL_REPEAT, true, true);
     if (!top_normal) return false;
-    
+
     return true;
 }
 
@@ -1244,17 +1259,18 @@ int main(int argc, char** argv)
     // set up mouse movement callback and enable raw mouse motion if supported
     glfwSetCursorPosCallback(pWindow, mouseCallback);
     
-    if (glfwRawMouseMotionSupported()) {
-        glfwSetInputMode(pWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-    }
+    // if (glfwRawMouseMotionSupported()) {
+    //     glfwSetInputMode(pWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    // }
 
     // initialize GLAD, which acts as a library loader for the current OS's native OpenGL library
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
+    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // set the mouse cursor to the center of the window at the start of the program
     glfwSetCursorPos(pWindow, WINDOW_WIDTH/2.0, WINDOW_HEIGHT/2.0);
 
-    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    firstMouse = true;
 
     // if our initial setup is successful...
     if (setup())
