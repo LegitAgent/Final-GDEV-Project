@@ -1454,6 +1454,7 @@ GLuint pod_texture;
 GLuint floor_texture;
 GLuint noise_texture;
 GLuint background_texture;
+GLuint sun_texture;
 
 // Helper function to setup multiple vaos and vbos
 bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t size, const char* vs, const char* fs) {
@@ -1590,13 +1591,111 @@ void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
 }
 
 void drawSun(const glm::mat4& modelMatrix, const glm::mat4& projectionMatrix) {
-    glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
     glUseProgram(sunShader);
     glUniformMatrix4fv(glGetUniformLocation(sunShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(glGetUniformLocation(sunShader, "modelMatrix"),      1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform1i(glGetUniformLocation(sunShader, "sunTexture"), 0);
     glUniform3fv(glGetUniformLocation(sunShader, "lightColor"), 1, glm::value_ptr(lightColor));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, sun_texture);
+
     glBindVertexArray(sunVAO);
     glDrawArrays(GL_TRIANGLES, 0, sizeof(sun) / (TOTAL_VECTOR_POINTS * sizeof(float)));
+}
+
+void drawBackground(const glm::mat4& projectionMatrix, const float scrollAmount) {
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));
+
+    glUseProgram(backgroundShader);
+    glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform1i(glGetUniformLocation(backgroundShader, "background_texture"), 0);
+    glUniform1f(glGetUniformLocation(backgroundShader, "backgroundScroll"), scrollAmount);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, background_texture);
+
+    glBindVertexArray(backgroundVAO);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(background) / (TOTAL_VECTOR_POINTS * sizeof(float)));
+}
+
+void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
+    // The raw vertex arrays are scaled down to fit [-1, 1], so scale the
+    // assembled ship back up here for a readable on-screen size.
+    glm::mat4 projectionView = projection * view;
+    model = glm::translate(model, glm::vec3(-0.09f, 0.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(1.44f, 1.44f, 1.44f));
+
+    // Main saucer: flatter and wider to read more like the Falcon hull.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, base_texture);
+
+    glm::mat4 baseHull = glm::scale(model, glm::vec3(1.16f, 0.94f, 0.26f));
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, baseHull);
+
+    // Raised center body: pulled slightly rearward to mimic the Falcon's top mass.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, middle_texture);
+
+    // Connector slab so the base hull and middle hull read as one continuous body.
+    glm::mat4 centerConnector = glm::translate(model, glm::vec3(-0.09f, 0.0f, -0.03f));
+    centerConnector = glm::scale(centerConnector, glm::vec3(1.02f, 0.84f, 0.22f));
+    drawPodSection(podAttachmentShader, projectionView, centerConnector);
+    
+    glm::mat4 centerBody = glm::translate(model, glm::vec3(-0.09f, 0.0f, -0.05f));
+    centerBody = glm::scale(centerBody, glm::vec3(0.95f, 0.78f, 0.16f));
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, centerBody);
+
+    // Highest central hump: smaller and offset so the middle protrudes.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, top_texture);
+
+    // Secondary connector to remove the gap between middle hull and top hump.
+    glm::mat4 humpConnector = glm::translate(model, glm::vec3(-0.04f, 0.0f, -0.09f));
+    humpConnector = glm::scale(humpConnector, glm::vec3(0.58f, 0.48f, 0.14f));
+    drawPodSection(podAttachmentShader, projectionView, humpConnector);
+    
+    glm::mat4 dorsalHump = glm::translate(model, glm::vec3(-0.02f, 0.0f, -0.10f));
+    dorsalHump = glm::scale(dorsalHump, glm::vec3(0.50f, 0.44f, 0.11f));
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, dorsalHump);
+    
+    // Mandibles
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mandible_texture);
+    
+    glm::mat4 mandibleModel = glm::translate(model, glm::vec3(0.34f, 0.0f, -0.01f));
+    mandibleModel = glm::scale(mandibleModel, glm::vec3(0.74f, 0.76f, 0.35f));
+    glm::mat4 mandibleNormal = glm::transpose(glm::inverse(mandibleModel));
+
+    glUseProgram(frontMandiblesShader);
+    applyLight(frontMandiblesShader);
+    glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionView));
+    glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(mandibleModel));
+    glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(mandibleNormal));
+    glBindVertexArray(frontMandiblesVAO);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(frontMandibles) / (TOTAL_VECTOR_POINTS * sizeof(float)));
+
+    // Center fork bar between the mandibles, extending in the same forward direction.
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gun_texture);
+
+    glm::mat4 centerBar = glm::translate(model, glm::vec3(0.59f, 0.0f, -0.01f));
+    centerBar = glm::scale(centerBar, glm::vec3(0.95f, 0.16f, 0.18f));
+    drawPodSection(podAttachmentShader, projectionView, centerBar);
+
+    // Pods
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, pod_texture);
+    // Side thruster pods mounted near the rear flanks.
+    glm::mat4 upperThruster = glm::translate(model, glm::vec3(-0.43f, 0.36f, 0.01f));
+    upperThruster = glm::scale(upperThruster, glm::vec3(0.24f, 0.24f, 0.13f));
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, upperThruster);
+
+    glm::mat4 lowerThruster = glm::translate(model, glm::vec3(-0.43f, -0.36f, 0.01f));
+    lowerThruster = glm::scale(lowerThruster, glm::vec3(0.24f, 0.24f, 0.13f));
+    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, lowerThruster);
 }
 
 // called by the main function to do initial setup, such as uploading vertex
@@ -1706,8 +1805,8 @@ bool setup() {
         sunShader,
         sun,
         sizeof(sun),
-        "lightsource.vs",
-        "lightsource.fs"
+        "sun.vs",
+        "sun.fs"
     )) {
         return false;
     }
@@ -1739,102 +1838,14 @@ bool setup() {
     background_texture = gdevLoadTexture("space.png", GL_REPEAT, true, true);
     if (!background_texture) return false;
 
+    sun_texture = gdevLoadTexture("blue_sun.png", GL_REPEAT, true, true);
+    if (!sun_texture) return false;
     return true;
 }
 
-void drawBackground(const glm::mat4& projectionMatrix, const float scrollAmount) {
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));
 
-    glUseProgram(backgroundShader);
-    glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniform1i(glGetUniformLocation(backgroundShader, "background_texture"), 0);
-    glUniform1f(glGetUniformLocation(backgroundShader, "backgroundScroll"), scrollAmount);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, background_texture);
 
-    glBindVertexArray(backgroundVAO);
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(background) / (TOTAL_VECTOR_POINTS * sizeof(float)));
-}
-
-void drawMillenniumFalcon(glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
-    // The raw vertex arrays are scaled down to fit [-1, 1], so scale the
-    // assembled ship back up here for a readable on-screen size.
-    glm::mat4 projectionView = projection * view;
-    model = glm::translate(model, glm::vec3(-0.09f, 0.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(1.44f, 1.44f, 1.44f));
-
-    // Main saucer: flatter and wider to read more like the Falcon hull.
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, base_texture);
-
-    glm::mat4 baseHull = glm::scale(model, glm::vec3(1.16f, 0.94f, 0.26f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, baseHull);
-
-    // Raised center body: pulled slightly rearward to mimic the Falcon's top mass.
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, middle_texture);
-
-    // Connector slab so the base hull and middle hull read as one continuous body.
-    glm::mat4 centerConnector = glm::translate(model, glm::vec3(-0.09f, 0.0f, -0.03f));
-    centerConnector = glm::scale(centerConnector, glm::vec3(1.02f, 0.84f, 0.22f));
-    drawPodSection(podAttachmentShader, projectionView, centerConnector);
-    
-    glm::mat4 centerBody = glm::translate(model, glm::vec3(-0.09f, 0.0f, -0.05f));
-    centerBody = glm::scale(centerBody, glm::vec3(0.95f, 0.78f, 0.16f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, centerBody);
-
-    // Highest central hump: smaller and offset so the middle protrudes.
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, top_texture);
-
-    // Secondary connector to remove the gap between middle hull and top hump.
-    glm::mat4 humpConnector = glm::translate(model, glm::vec3(-0.04f, 0.0f, -0.09f));
-    humpConnector = glm::scale(humpConnector, glm::vec3(0.58f, 0.48f, 0.14f));
-    drawPodSection(podAttachmentShader, projectionView, humpConnector);
-    
-    glm::mat4 dorsalHump = glm::translate(model, glm::vec3(-0.02f, 0.0f, -0.10f));
-    dorsalHump = glm::scale(dorsalHump, glm::vec3(0.50f, 0.44f, 0.11f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, dorsalHump);
-    
-    // Mandibles
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mandible_texture);
-    
-    glm::mat4 mandibleModel = glm::translate(model, glm::vec3(0.34f, 0.0f, -0.01f));
-    mandibleModel = glm::scale(mandibleModel, glm::vec3(0.74f, 0.76f, 0.35f));
-    glm::mat4 mandibleNormal = glm::transpose(glm::inverse(mandibleModel));
-
-    glUseProgram(frontMandiblesShader);
-    applyLight(frontMandiblesShader);
-    glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionView));
-    glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(mandibleModel));
-    glUniformMatrix4fv(glGetUniformLocation(frontMandiblesShader, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(mandibleNormal));
-    glBindVertexArray(frontMandiblesVAO);
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(frontMandibles) / (TOTAL_VECTOR_POINTS * sizeof(float)));
-
-    // Center fork bar between the mandibles, extending in the same forward direction.
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gun_texture);
-
-    glm::mat4 centerBar = glm::translate(model, glm::vec3(0.59f, 0.0f, -0.01f));
-    centerBar = glm::scale(centerBar, glm::vec3(0.95f, 0.16f, 0.18f));
-    drawPodSection(podAttachmentShader, projectionView, centerBar);
-
-    // Pods
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, pod_texture);
-    // Side thruster pods mounted near the rear flanks.
-    glm::mat4 upperThruster = glm::translate(model, glm::vec3(-0.43f, 0.36f, 0.01f));
-    upperThruster = glm::scale(upperThruster, glm::vec3(0.24f, 0.24f, 0.13f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, upperThruster);
-
-    glm::mat4 lowerThruster = glm::translate(model, glm::vec3(-0.43f, -0.36f, 0.01f));
-    lowerThruster = glm::scale(lowerThruster, glm::vec3(0.24f, 0.24f, 0.13f));
-    drawCylinder(circleTopShader, circleBottomShader, triangleStripShader, projectionView, lowerThruster);
-}
 
 // called by the main function to do rendering per frame
 void render()
@@ -1932,7 +1943,6 @@ void render()
     drawBackground(projectionView, time * 0.01f);
 
     glm::vec3 sunPos = glm::vec3(0.0f, 10.0f, -80.0f);
-
     glm::mat4 sunModel = glm::mat4(1.0f);
     sunModel = glm::translate(sunModel, sunPos);
     sunModel = glm::scale(sunModel, glm::vec3(SUN_SIZE));
