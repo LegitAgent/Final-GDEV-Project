@@ -46,7 +46,7 @@ void main() {
   
   float diffuse = max(dot(n, l), 0.0);
   vec3 diffuseColor = diffuse * lightColor;
-  vec3 ambient = 0.75f * vec3(0.22f, 0.08f, 0.35f);
+  vec3 ambient = 0.4f * vec3(0.22f, 0.08f, 0.35f);
 
   vec3 viewDir = normalize(cameraPos - worldSpacePosition);
   vec3 reflectDir = reflect(-l, n);
