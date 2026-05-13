@@ -26,7 +26,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = WINDOW_WIDTH / 2, lastY = WINDOW_HEIGHT / 2;
 bool firstMouse = true;
-float sensitivity = 0.1f;
+float sensitivity = 0.001f;
 
 // light
 glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, -4.0f); // temp just to see everything adjusted y
@@ -1579,7 +1579,7 @@ void drawFloor(const glm::mat4& projectionMatrix, float scrollAmount) {
     // 2 tile set loop, just translated in z axis
     for (int i = 0; i < 3; i++) {
         glm::mat4 modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -1.5f, -8.0f + floorOffset - floorLength * i));
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, -4.0f, -8.0f + floorOffset - floorLength * i));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(24.0f, 1.0f, 26.0f)); // scale it to 24 x 26
 
         glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
@@ -1744,6 +1744,7 @@ bool setup() {
 
 void drawBackground(const glm::mat4& projectionMatrix, const float scrollAmount) {
     glm::mat4 modelMatrix = glm::mat4(1.0f);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));
 
     glUseProgram(backgroundShader);
     glUniformMatrix4fv(glGetUniformLocation(backgroundShader, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
@@ -1944,11 +1945,13 @@ void render()
     drawFloor(projectionView, time * 4.0f);
     
     glm::mat4 milleniumFlacon = glm::mat4(1.0f);
-    milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(0.0f, 3.0f, -15.0f));
+    milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(0.0f, -2.0f, -10.0f));
+    milleniumFlacon = glm::translate(milleniumFlacon, glm::vec3(sin(time)*5.0f, 0.0, sin(time)*2.0f));
     milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    milleniumFlacon = glm::scale(milleniumFlacon, glm::vec3(5.0f));
-    milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(sin(time * 0.75f) * 45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    milleniumFlacon = glm::scale(milleniumFlacon, glm::vec3(4.0f));
+    milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(sin(time * 0.75f) * 20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    milleniumFlacon = glm::rotate(milleniumFlacon, glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     drawMillenniumFalcon(milleniumFlacon, view, projection);
 }

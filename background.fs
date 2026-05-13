@@ -9,7 +9,7 @@ uniform float backgroundScroll;
 out vec4 fragmentColor;
 
 void main() {
-    vec2 scrollBG = shaderUV + vec2(backgroundScroll, 0.0f);
+    vec2 scrollBG = shaderUV + vec2(0.0f, backgroundScroll);
     vec4 texColor = texture(background_texture, scrollBG);
     fragmentColor = vec4(texColor.rgb * objectColor, texColor.a);
 }
