@@ -9,6 +9,6 @@ uniform vec3 lightColor;
 out vec4 fragmentColor;
 
 void main() {
-    vec4 texColor = texture(sunTexture, shaderUV * 0.1);
-    fragmentColor = vec4(texColor.rgb * lightColor, texColor.a);
+    vec4 texColor = texture(sunTexture, shaderUV);
+    fragmentColor = vec4(texColor.rgb * vec3(0.0, 0.0, 1.0), texColor.a);
 }

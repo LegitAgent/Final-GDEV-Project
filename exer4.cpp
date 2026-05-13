@@ -1838,7 +1838,7 @@ bool setup() {
     background_texture = gdevLoadTexture("space.png", GL_REPEAT, true, true);
     if (!background_texture) return false;
 
-    sun_texture = gdevLoadTexture("blue_sun.png", GL_REPEAT, true, true);
+    sun_texture = gdevLoadTexture("sun.png", GL_REPEAT, true, true);
     if (!sun_texture) return false;
     return true;
 }
