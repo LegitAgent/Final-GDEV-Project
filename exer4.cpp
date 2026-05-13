@@ -26,7 +26,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = WINDOW_WIDTH / 2, lastY = WINDOW_HEIGHT / 2;
 bool firstMouse = true;
-float sensitivity = 0.001f;
+float sensitivity = 0.01f;
 
 // light
 glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, -4.0f); // temp just to see everything adjusted y
@@ -1845,7 +1845,7 @@ bool setup() {
 
     top_normal = gdevLoadTexture("metal1_normal.png", GL_REPEAT, true, true);
     if (!top_normal) return false;
-    
+
     return true;
 }
 
@@ -2100,17 +2100,18 @@ int main(int argc, char** argv)
     // set up mouse movement callback and enable raw mouse motion if supported
     glfwSetCursorPosCallback(pWindow, mouseCallback);
     
-    if (glfwRawMouseMotionSupported()) {
-        glfwSetInputMode(pWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-    }
+    // if (glfwRawMouseMotionSupported()) {
+    //     glfwSetInputMode(pWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    // }
 
     // initialize GLAD, which acts as a library loader for the current OS's native OpenGL library
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
+    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // set the mouse cursor to the center of the window at the start of the program
     glfwSetCursorPos(pWindow, WINDOW_WIDTH/2.0, WINDOW_HEIGHT/2.0);
 
-    glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    firstMouse = true;
 
     // if our initial setup is successful...
     if (setup())
