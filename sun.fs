@@ -5,10 +5,11 @@ in vec2 shaderUV;
 
 uniform sampler2D sunTexture;
 uniform vec3 lightColor;
+uniform float time;
 
 out vec4 fragmentColor;
 
 void main() {
-    vec4 texColor = texture(sunTexture, shaderUV);
-    fragmentColor = vec4(texColor.rgb * vec3(0.0, 0.0, 1.0), texColor.a);
+    vec4 texColor = texture(sunTexture, shaderUV + vec2(time * 0.01, time * 0.01));
+    fragmentColor = vec4(texColor.rgb * lightColor, texColor.a);
 }

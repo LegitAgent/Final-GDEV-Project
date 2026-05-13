@@ -1455,6 +1455,7 @@ GLuint floor_texture;
 GLuint noise_texture;
 GLuint background_texture;
 GLuint sun_texture;
+GLuint top_normal;
 
 // Helper function to setup multiple vaos and vbos
 bool setupVO(GLuint& vao, GLuint& vbo, GLuint& shader, float* vertices, size_t size, const char* vs, const char* fs) {
@@ -1596,6 +1597,7 @@ void drawSun(const glm::mat4& modelMatrix, const glm::mat4& projectionMatrix) {
     glUniformMatrix4fv(glGetUniformLocation(sunShader, "modelMatrix"),      1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniform1i(glGetUniformLocation(sunShader, "sunTexture"), 0);
     glUniform3fv(glGetUniformLocation(sunShader, "lightColor"), 1, glm::value_ptr(lightColor));
+    glUniform1f(glGetUniformLocation(sunShader, "time"), glfwGetTime());
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sun_texture);
@@ -1805,7 +1807,7 @@ bool setup() {
         sunShader,
         sun,
         sizeof(sun),
-        "sun.vs",
+        "texturedLit.vs",
         "sun.fs"
     )) {
         return false;
@@ -1817,7 +1819,7 @@ bool setup() {
     middle_texture = gdevLoadTexture("falcon_middle.png", GL_REPEAT, true, true);
     if (!middle_texture) return false;
 
-    top_texture = gdevLoadTexture("falcon_top.png", GL_REPEAT, true, true);
+    top_texture = gdevLoadTexture("metal1.jpg", GL_REPEAT, true, true);
     if (!top_texture) return false;
 
     mandible_texture = gdevLoadTexture("falcon_mandible.png", GL_REPEAT, true, true);
@@ -1840,11 +1842,12 @@ bool setup() {
 
     sun_texture = gdevLoadTexture("sun.png", GL_REPEAT, true, true);
     if (!sun_texture) return false;
+
+    top_normal = gdevLoadTexture("metal1_normal.png", GL_REPEAT, true, true);
+    if (!top_normal) return false;
+    
     return true;
 }
-
-
-
 
 
 // called by the main function to do rendering per frame
